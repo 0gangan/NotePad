@@ -368,7 +368,9 @@ public class NoteEditor extends Activity {
                  */
             } else if (mState == STATE_EDIT) {
                 // Creates a map to contain the new values for the columns
-                updateNote(text, null);
+                if (isNoteModified()) {   // 关键：这里要加判断
+                    updateNote(text, null);
+                }
             } else if (mState == STATE_INSERT) {
                 updateNote(text, text);
                 mState = STATE_EDIT;
@@ -612,4 +614,11 @@ public class NoteEditor extends Activity {
             mText.setText("");
         }
     }
+    private boolean isNoteModified() {
+        int colNoteIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
+        String savedNote = mCursor.getString(colNoteIndex);
+        String currentNote = mText.getText().toString();
+        return !savedNote.equals(currentNote);
+    }
+
 }
