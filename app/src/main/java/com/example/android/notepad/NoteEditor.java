@@ -19,6 +19,7 @@ package com.example.android.notepad;
 import static com.example.android.notepad.R.*;
 
 import android.app.Activity;
+import android.appwidget.AppWidgetManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -465,42 +466,30 @@ public class NoteEditor extends Activity {
             return true;
         }
         else if (id == R.id.menu_color_white) {
-            int color = getResources().getColor(R.color.note_color_white);
-            mText.setBackgroundColor(color);
-            ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
-            getContentResolver().update(mUri, values, null, null);
+            updateColor(getResources().getColor(R.color.note_color_white));
             return true;
         } else if (id == R.id.menu_color_yellow) {
-            int color = getResources().getColor(R.color.note_color_yellow);
-            mText.setBackgroundColor(color);
-            ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
-            getContentResolver().update(mUri, values, null, null);
+            updateColor(getResources().getColor(R.color.note_color_yellow));
             return true;
         } else if (id == R.id.menu_color_blue) {
-            int color = getResources().getColor(R.color.note_color_blue);
-            mText.setBackgroundColor(color);
-            ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
-            getContentResolver().update(mUri, values, null, null);
+            updateColor(getResources().getColor(R.color.note_color_blue));
             return true;
         } else if (id == R.id.menu_color_green) {
-            int color = getResources().getColor(R.color.note_color_green);
-            mText.setBackgroundColor(color);
-            ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
-            getContentResolver().update(mUri, values, null, null);
+            updateColor(getResources().getColor(R.color.note_color_green));
             return true;
         } else if (id == R.id.menu_color_red) {
-            int color = getResources().getColor(R.color.note_color_red);
-            mText.setBackgroundColor(color);
-            ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
-            getContentResolver().update(mUri, values, null, null);
+            updateColor(getResources().getColor(R.color.note_color_red));
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    private void updateColor(int color) {
+        mText.setBackgroundColor(color);
+        ContentValues values = new ContentValues();
+        values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
+        getContentResolver().update(mUri, values, null, null);
+        updateWidget();
     }
 
 //BEGIN_INCLUDE(paste)
@@ -631,7 +620,7 @@ public class NoteEditor extends Activity {
                 null     // No where columns are used, so no where arguments are necessary.
             );
 
-
+        updateWidget();
     }
 
     /**
@@ -665,8 +654,22 @@ public class NoteEditor extends Activity {
             mCursor = null;
             getContentResolver().delete(mUri, null, null);
             mText.setText("");
+            updateWidget();
         }
     }
+    
+    private void updateWidget() {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        ComponentName thisWidget = new ComponentName(this, NoteWidgetProvider.class);
+        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+        if (allWidgetIds != null && allWidgetIds.length > 0) {
+            Intent intent = new Intent(this, NoteWidgetProvider.class);
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+            sendBroadcast(intent);
+        }
+    }
+
     private boolean isNoteModified() {
         int colNoteIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
         String savedNote = mCursor.getString(colNoteIndex);
