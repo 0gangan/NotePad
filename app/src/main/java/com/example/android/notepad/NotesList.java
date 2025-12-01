@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +17,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+
+import android.content.ContentValues;
+import android.content.ClipboardManager;
+import android.content.ClipData;
+import android.content.Context;
+import android.net.Uri;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -222,12 +227,46 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
             return true;
         }
         if (id == R.id.menu_add) {
-            Intent intent = new Intent(Intent.ACTION_INSERT, NotePad.Notes.CONTENT_URI);
-            startActivity(intent);
+            // 插入一条空笔记并以 ACTION_EDIT 打开，以便可以编辑标题
+            ContentValues values = new ContentValues();
+            long now = System.currentTimeMillis();
+            values.put(NotePad.Notes.COLUMN_NAME_TITLE, "");
+            values.put(NotePad.Notes.COLUMN_NAME_NOTE, "");
+            values.put(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, now);
+
+            Uri newUri = getContentResolver().insert(NotePad.Notes.CONTENT_URI, values);
+            if (newUri != null) {
+                Intent intent = new Intent(this, NoteEditor.class);
+                intent.setAction(Intent.ACTION_EDIT);
+                intent.setData(newUri);
+                startActivity(intent);
+            }
             return true;
         } else if (id == R.id.menu_paste) {
-            Intent intent = new Intent(Intent.ACTION_PASTE, NotePad.Notes.CONTENT_URI);
-            startActivity(intent);
+            // 从剪贴板获取文本并插入新笔记，然后以 ACTION_EDIT 打开
+            String text = "";
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null && clipboard.hasPrimaryClip()) {
+                ClipData cd = clipboard.getPrimaryClip();
+                if (cd != null && cd.getItemCount() > 0) {
+                    CharSequence cs = cd.getItemAt(0).coerceToText(this);
+                    if (cs != null) text = cs.toString();
+                }
+            }
+
+            ContentValues values = new ContentValues();
+            long now = System.currentTimeMillis();
+            values.put(NotePad.Notes.COLUMN_NAME_TITLE, "");
+            values.put(NotePad.Notes.COLUMN_NAME_NOTE, text);
+            values.put(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, now);
+
+            Uri newUri = getContentResolver().insert(NotePad.Notes.CONTENT_URI, values);
+            if (newUri != null) {
+                Intent intent = new Intent(this, NoteEditor.class);
+                intent.setAction(Intent.ACTION_EDIT);
+                intent.setData(newUri);
+                startActivity(intent);
+            }
             return true;
         } else if (id == R.id.menu_search) {
             showSearchDialog();

@@ -20,7 +20,7 @@
 
     <string name="title_edit_title">Note title:</string>
     <string name="title_create">New note</string>
-    <string name="title_edit">Edit: %1$s</string>
+    <string name="title_edit"> %1$s</string>
     <string name="title_notes_list">Notes</string>
 
     <string name="menu_add">New note</string>
