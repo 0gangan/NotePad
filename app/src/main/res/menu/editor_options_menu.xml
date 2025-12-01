@@ -12,4 +12,22 @@
           android:icon="@drawable/ic_menu_delete"
           android:title="@string/menu_delete"
           android:showAsAction="ifRoom|withText" />
+    <item android:id="@+id/menu_color"
+        android:title="Change Color"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_gallery"
+        >
+        <menu>
+            <item android:id="@+id/menu_color_white"
+                android:title="White"/>
+            <item android:id="@+id/menu_color_yellow"
+                android:title="Yellow"/>
+            <item android:id="@+id/menu_color_blue"
+                android:title="Blue"/>
+            <item android:id="@+id/menu_color_green"
+                android:title="Green"/>
+            <item android:id="@+id/menu_color_red"
+                android:title="Red"/>
+        </menu>
+    </item>
 </menu>

@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -62,7 +63,8 @@ public class NoteEditor extends Activity {
         new String[] {
             NotePad.Notes._ID,
             NotePad.Notes.COLUMN_NAME_TITLE,
-            NotePad.Notes.COLUMN_NAME_NOTE
+            NotePad.Notes.COLUMN_NAME_NOTE,
+            NotePad.Notes.COLUMN_NAME_BACK_COLOR
     };
 
     // A label for the saved state of the activity
@@ -303,6 +305,12 @@ public class NoteEditor extends Activity {
                 mOriginalContent = note;
             }
 
+            int colBackIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_BACK_COLOR);
+            int color = mCursor.getInt(colBackIndex);
+            if (color != 0) {
+                mText.setBackgroundColor(color);
+            }
+
         /*
          * Something is wrong. The Cursor should always contain data. Report an error in the
          * note.
@@ -454,6 +462,37 @@ public class NoteEditor extends Activity {
             cancelNote();
         } else if (id == android.R.id.home) {
             finish();
+            return true;
+        }
+        else if (id == R.id.menu_color_white) {
+            mText.setBackgroundColor(Color.WHITE);
+            ContentValues values = new ContentValues();
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.WHITE);
+            getContentResolver().update(mUri, values, null, null);
+            return true;
+        } else if (id == R.id.menu_color_yellow) {
+            mText.setBackgroundColor(Color.YELLOW);
+            ContentValues values = new ContentValues();
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.YELLOW);
+            getContentResolver().update(mUri, values, null, null);
+            return true;
+        } else if (id == R.id.menu_color_blue) {
+            mText.setBackgroundColor(Color.BLUE);
+            ContentValues values = new ContentValues();
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.BLUE);
+            getContentResolver().update(mUri, values, null, null);
+            return true;
+        } else if (id == R.id.menu_color_green) {
+            mText.setBackgroundColor(Color.GREEN);
+            ContentValues values = new ContentValues();
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.GREEN);
+            getContentResolver().update(mUri, values, null, null);
+            return true;
+        } else if (id == R.id.menu_color_red) {
+            mText.setBackgroundColor(Color.RED);
+            ContentValues values = new ContentValues();
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.RED);
+            getContentResolver().update(mUri, values, null, null);
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,7 +40,8 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
             NotePad.Notes._ID,
             NotePad.Notes.COLUMN_NAME_TITLE,
             NotePad.Notes.COLUMN_NAME_NOTE,
-            NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE
+            NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE,
+            NotePad.Notes.COLUMN_NAME_BACK_COLOR
     };
 
     // 3. 定义 Loader ID
@@ -99,12 +101,14 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
         String[] from = new String[] {
                 NotePad.Notes.COLUMN_NAME_TITLE,
                 NotePad.Notes.COLUMN_NAME_NOTE,
-                NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE
+                NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE,
+                NotePad.Notes.COLUMN_NAME_BACK_COLOR
         };
         int[] to = new int[] {
                 R.id.title,
                 R.id.text,
-                R.id.modified
+                R.id.modified,
+                R.id.back_color
         };
 
         // 6. Adapter 只初始化一次，游标由 Loader 异步提供
@@ -139,6 +143,15 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
                             ((TextView) view).setText(formatted);
                         } else {
                             ((TextView) view).setText("");
+                        }
+                        return true;
+                    } else if (view.getId() == R.id.back_color) {
+                        int x = cursor.getInt(columnIndex);
+                        if (x != 0) {
+                            view.setBackgroundColor(x);
+                        }
+                        else {
+                            view.setBackgroundColor(Color.rgb(255, 255, 255));
                         }
                         return true;
                     }
@@ -233,6 +246,7 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
             values.put(NotePad.Notes.COLUMN_NAME_TITLE, "");
             values.put(NotePad.Notes.COLUMN_NAME_NOTE, "");
             values.put(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, now);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.rgb(255, 255, 255));
 
             Uri newUri = getContentResolver().insert(NotePad.Notes.CONTENT_URI, values);
             if (newUri != null) {
@@ -259,6 +273,7 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
             values.put(NotePad.Notes.COLUMN_NAME_TITLE, "");
             values.put(NotePad.Notes.COLUMN_NAME_NOTE, text);
             values.put(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, now);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.rgb(255, 255, 255));
 
             Uri newUri = getContentResolver().insert(NotePad.Notes.CONTENT_URI, values);
             if (newUri != null) {
