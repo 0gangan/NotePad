@@ -19,15 +19,20 @@
         >
         <menu>
             <item android:id="@+id/menu_color_white"
-                android:title="White"/>
+                android:title="White"
+                android:icon="@drawable/color_icon_white"/>
             <item android:id="@+id/menu_color_yellow"
-                android:title="Yellow"/>
+                android:title="Yellow"
+                android:icon="@drawable/color_icon_yellow"/>
             <item android:id="@+id/menu_color_blue"
-                android:title="Blue"/>
+                android:title="Blue"
+                android:icon="@drawable/color_icon_blue"/>
             <item android:id="@+id/menu_color_green"
-                android:title="Green"/>
+                android:title="Green"
+                android:icon="@drawable/color_icon_green"/>
             <item android:id="@+id/menu_color_red"
-                android:title="Red"/>
+                android:title="Red"
+                android:icon="@drawable/color_icon_red"/>
         </menu>
     </item>
 </menu>

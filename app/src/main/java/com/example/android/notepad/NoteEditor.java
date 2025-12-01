@@ -465,33 +465,38 @@ public class NoteEditor extends Activity {
             return true;
         }
         else if (id == R.id.menu_color_white) {
-            mText.setBackgroundColor(Color.WHITE);
+            int color = getResources().getColor(R.color.note_color_white);
+            mText.setBackgroundColor(color);
             ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.WHITE);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
             getContentResolver().update(mUri, values, null, null);
             return true;
         } else if (id == R.id.menu_color_yellow) {
-            mText.setBackgroundColor(Color.YELLOW);
+            int color = getResources().getColor(R.color.note_color_yellow);
+            mText.setBackgroundColor(color);
             ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.YELLOW);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
             getContentResolver().update(mUri, values, null, null);
             return true;
         } else if (id == R.id.menu_color_blue) {
-            mText.setBackgroundColor(Color.BLUE);
+            int color = getResources().getColor(R.color.note_color_blue);
+            mText.setBackgroundColor(color);
             ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.BLUE);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
             getContentResolver().update(mUri, values, null, null);
             return true;
         } else if (id == R.id.menu_color_green) {
-            mText.setBackgroundColor(Color.GREEN);
+            int color = getResources().getColor(R.color.note_color_green);
+            mText.setBackgroundColor(color);
             ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.GREEN);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
             getContentResolver().update(mUri, values, null, null);
             return true;
         } else if (id == R.id.menu_color_red) {
-            mText.setBackgroundColor(Color.RED);
+            int color = getResources().getColor(R.color.note_color_red);
+            mText.setBackgroundColor(color);
             ContentValues values = new ContentValues();
-            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, Color.RED);
+            values.put(NotePad.Notes.COLUMN_NAME_BACK_COLOR, color);
             getContentResolver().update(mUri, values, null, null);
             return true;
         }
