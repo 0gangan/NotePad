@@ -14,7 +14,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -35,6 +37,9 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
 
     // 2. 移除 mCursor 成员变量，LoaderManager 会管理游标
     private SimpleCursorAdapter mAdapter;
+    private SimpleCursorAdapter mGridAdapter;
+    private GridView mGridView;
+    private boolean isGridView = false;
 
     private static final String[] PROJECTION = new String[] {
             NotePad.Notes._ID,
@@ -50,12 +55,65 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
     // 用于搜索查询的 Bundle 键
     private static final String LOADER_ARG_QUERY = "query";
 
+    private final SimpleCursorAdapter.ViewBinder mViewBinder = new SimpleCursorAdapter.ViewBinder() {
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+            if (view.getId() == R.id.modified) {
+                long millis = 0;
+                try {
+                    // 确保列数据是 long 类型的时间戳
+                    millis = cursor.getLong(columnIndex);
+                } catch (Exception e) {
+                    // 捕获异常，例如游标数据为空或类型不匹配
+                    // Log.e("NotesList", "Error getting timestamp: " + e.getMessage());
+                }
+
+                if (millis > 0) {
+                    // 修改为北京时间格式
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                    sdf.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+                    String formatted = sdf.format(new Date(millis));
+
+                    ((TextView) view).setText(formatted);
+                } else {
+                    ((TextView) view).setText("");
+                }
+                return true;
+            } else if (view.getId() == R.id.back_color) {
+                int x = cursor.getInt(columnIndex);
+                if (x != 0) {
+                    view.setBackgroundColor(x);
+                }
+                else {
+                    view.setBackgroundColor(Color.rgb(255, 255, 255));
+                }
+                return true;
+            }
+            return false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.notes_list_view);
+
         // 4. 初始化 Adapter，使用 null 游标
         setupListAdapter(null);
+        setupGridAdapter(null);
+
+        mGridView = (GridView) findViewById(R.id.grid);
+        mGridView.setAdapter(mGridAdapter);
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(NotesList.this, NoteEditor.class);
+                intent.setAction(Intent.ACTION_EDIT);
+                intent.setData(android.content.ContentUris.withAppendedId(NotePad.Notes.CONTENT_URI, id));
+                startActivity(intent);
+            }
+        });
 
         // 5. 启动初始加载器
         loadNotes();
@@ -115,51 +173,30 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
         if (mAdapter == null) {
             // 参数 flag 设置为 0 (无需额外的游标管理)
             mAdapter = new SimpleCursorAdapter(this, R.layout.noteslist_item, cursor, from, to, 0);
-
             // 设置 ViewBinder 以格式化时间戳为可读时间
-            mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                @Override
-                public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                    if (view.getId() == R.id.modified) {
-                        long millis = 0;
-                        try {
-                            // 确保列数据是 long 类型的时间戳
-                            millis = cursor.getLong(columnIndex);
-                        } catch (Exception e) {
-                            // 捕获异常，例如游标数据为空或类型不匹配
-                            // Log.e("NotesList", "Error getting timestamp: " + e.getMessage());
-                        }
-
-                        if (millis > 0) {
-                            // 格式化日期和时间
-                            // String formatted = DateFormat.getDateFormat(NotesList.this).format(new Date(millis))
-                            //        + " " + DateFormat.getTimeFormat(NotesList.this).format(new Date(millis));
-                            
-                            // 修改为北京时间格式
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-                            String formatted = sdf.format(new Date(millis));
-                            
-                            ((TextView) view).setText(formatted);
-                        } else {
-                            ((TextView) view).setText("");
-                        }
-                        return true;
-                    } else if (view.getId() == R.id.back_color) {
-                        int x = cursor.getInt(columnIndex);
-                        if (x != 0) {
-                            view.setBackgroundColor(x);
-                        }
-                        else {
-                            view.setBackgroundColor(Color.rgb(255, 255, 255));
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            });
+            mAdapter.setViewBinder(mViewBinder);
 
             setListAdapter(mAdapter);
+        }
+    }
+
+    private void setupGridAdapter(Cursor cursor) {
+        String[] from = new String[] {
+                NotePad.Notes.COLUMN_NAME_TITLE,
+                NotePad.Notes.COLUMN_NAME_NOTE,
+                NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE,
+                NotePad.Notes.COLUMN_NAME_BACK_COLOR
+        };
+        int[] to = new int[] {
+                R.id.title,
+                R.id.text,
+                R.id.modified,
+                R.id.back_color
+        };
+
+        if (mGridAdapter == null) {
+            mGridAdapter = new SimpleCursorAdapter(this, R.layout.noteslist_square_item, cursor, from, to, 0);
+            mGridAdapter.setViewBinder(mViewBinder);
         }
     }
 
@@ -210,6 +247,9 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
         // 使用新的 Cursor 交换 Adapter 中的旧 Cursor。
         // Loader 会自动管理旧 Cursor 的关闭。
         mAdapter.swapCursor(data);
+        if (mGridAdapter != null) {
+            mGridAdapter.swapCursor(data);
+        }
     }
 
     /**
@@ -219,6 +259,9 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
     public void onLoaderReset(Loader<Cursor> loader) {
         // 将 Adapter 的 Cursor 设为 null，防止它试图访问已关闭的 Cursor
         mAdapter.swapCursor(null);
+        if (mGridAdapter != null) {
+            mGridAdapter.swapCursor(null);
+        }
     }
 
     // =========================================================================
@@ -237,6 +280,10 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
         int id = item.getItemId();
         if (id == android.R.id.home) {
             loadNotes();
+            return true;
+        }
+        if (id == R.id.menu_switch_view) {
+            toggleView();
             return true;
         }
         if (id == R.id.menu_add) {
@@ -289,6 +336,17 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
         }
         // 如果用户选择了“清除搜索”之类的选项，可以在这里调用 loadNotes()
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleView() {
+        isGridView = !isGridView;
+        if (isGridView) {
+            getListView().setVisibility(View.GONE);
+            mGridView.setVisibility(View.VISIBLE);
+        } else {
+            getListView().setVisibility(View.VISIBLE);
+            mGridView.setVisibility(View.GONE);
+        }
     }
 
     private void showSearchDialog() {
