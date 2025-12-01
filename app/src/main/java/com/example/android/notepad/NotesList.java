@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -81,11 +82,19 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
                 return true;
             } else if (view.getId() == R.id.back_color) {
                 int x = cursor.getInt(columnIndex);
-                if (x != 0) {
-                    view.setBackgroundColor(x);
-                }
-                else {
-                    view.setBackgroundColor(Color.rgb(255, 255, 255));
+                // 使用 View 的 getBackground() 获取 Drawable，并尝试将其转换为 GradientDrawable
+                // 这样可以保留 XML 中定义的圆角和边框，同时修改填充颜色
+                try {
+                    // 务必 mutate()，否则所有使用该 drawable 的 view 都会变色
+                    GradientDrawable background = (GradientDrawable) view.getBackground().mutate();
+                    background.setColor(x != 0 ? x : Color.WHITE);
+                } catch (Exception e) {
+                    // 如果背景不是 GradientDrawable，或者获取失败
+                    if (x != 0) {
+                        view.setBackgroundColor(x);
+                    } else {
+                        view.setBackgroundResource(R.drawable.card_background);
+                    }
                 }
                 return true;
             }
@@ -114,6 +123,11 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
                 startActivity(intent);
             }
         });
+
+        // 设置 ListView 的分隔线为透明，以展示卡片间距
+        ListView listView = getListView();
+        listView.setDivider(null);
+        listView.setDividerHeight(0);
 
         // 5. 启动初始加载器
         loadNotes();
