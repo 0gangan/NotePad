@@ -59,9 +59,13 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
      */
     private void loadNotes() {
         setTitle(R.string.app_name); // 重置标题为应用名
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setHomeButtonEnabled(false);
+        }
         // 初始化 Loader。如果 Loader 已存在，则不进行任何操作；如果不存在，则创建并启动。
         // 第三个参数 'this' 指向本 Activity，即 LoaderManager.LoaderCallbacks 的实现者
-        getLoaderManager().initLoader(NOTES_LIST_LOADER_ID, null, this);
+        getLoaderManager().restartLoader(NOTES_LIST_LOADER_ID, null, this);
     }
 
     /**
@@ -69,6 +73,10 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
      */
     private void searchNotes(String query) {
         setTitle(getString(R.string.search_title) + ": " + query);
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
 
         Bundle args = new Bundle();
         args.putString(LOADER_ARG_QUERY, query);
@@ -209,6 +217,10 @@ public class NotesList extends ListActivity implements LoaderManager.LoaderCallb
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if (id == android.R.id.home) {
+            loadNotes();
+            return true;
+        }
         if (id == R.id.menu_add) {
             Intent intent = new Intent(Intent.ACTION_INSERT, NotePad.Notes.CONTENT_URI);
             startActivity(intent);

@@ -226,6 +226,12 @@ public class NoteEditor extends Activity {
 
         // Sets the layout for this Activity. See res/layout/note_editor.xml
         setContentView(R.layout.note_editor);
+        
+        // Add the small triangle back button (Up button)
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
 
         // Gets a handle to the EditText in the the layout.
         mText = (EditText) findViewById(R.id.note);
@@ -368,7 +374,7 @@ public class NoteEditor extends Activity {
                  */
             } else if (mState == STATE_EDIT) {
                 // Creates a map to contain the new values for the columns
-                if (isNoteModified()) {   // 关键：这里要加判断
+                if (isNoteModified()) {
                     updateNote(text, null);
                 }
             } else if (mState == STATE_INSERT) {
@@ -446,6 +452,9 @@ public class NoteEditor extends Activity {
             finish();
         } else if (id == R.id.menu_revert) {
             cancelNote();
+        } else if (id == android.R.id.home) {
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
